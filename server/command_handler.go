@@ -67,6 +67,7 @@ type Command struct {
 	Name        CommandName
 	Environment string
 	Verbose     bool
+	Force       bool
 	Flags       []string
 }
 

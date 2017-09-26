@@ -34,6 +34,7 @@ func (e *EventParser) DetermineCommand(comment *github.IssueCommentEvent) (*Comm
 	// run plan
 	// @GithubUser plan staging
 	// atlantis plan staging --verbose
+	// atlantis plan staging --verbose --force
 	// atlantis plan staging --verbose -key=value -key2 value2
 	commentBody := comment.Comment.GetBody()
 	if commentBody == "" {
@@ -47,6 +48,7 @@ func (e *EventParser) DetermineCommand(comment *github.IssueCommentEvent) (*Comm
 
 	env := "default"
 	verbose := false
+	force := false
 	var flags []string
 
 	if !e.stringInSlice(args[0], []string{"run", "atlantis", "@" + e.GithubUser}) {
@@ -76,9 +78,15 @@ func (e *EventParser) DetermineCommand(comment *github.IssueCommentEvent) (*Comm
 			verbose = true
 			flags = e.removeOccurrences("--verbose", flags)
 		}
+		// check for --force specially and then remove any additional
+		// occurrences
+		if e.stringInSlice("--force", flags) {
+			force = true
+			flags = e.removeOccurrences("--force", flags)
+		}
 	}
 
-	c := &Command{Verbose: verbose, Environment: env, Flags: flags}
+	c := &Command{Verbose: verbose, Force: force, Environment: env, Flags: flags}
 	switch command {
 	case "plan":
 		c.Name = Plan

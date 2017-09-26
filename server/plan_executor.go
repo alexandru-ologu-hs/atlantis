@@ -72,7 +72,13 @@ func (p *PlanExecutor) setupAndPlan(ctx *CommandContext) CommandResponse {
 	}
 	ctx.Log.Info("found %d files modified in this pull request", len(modifiedFiles))
 
-	modifiedTerraformFiles := p.filterToTerraform(modifiedFiles)
+	var modifiedTerraformFiles []string
+
+	if ctx.Command.Force == false {
+		modifiedTerraformFiles = p.filterToTerraform(modifiedFiles)
+	} else {
+		modifiedTerraformFiles = modifiedFiles // do not filter if forced
+	}
 	if len(modifiedTerraformFiles) == 0 {
 		return p.failureResponse(ctx, "No Terraform files were modified.")
 	}
